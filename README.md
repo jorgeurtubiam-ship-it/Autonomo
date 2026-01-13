@@ -9,10 +9,17 @@ Un potente agente autónomo inspirado en la arquitectura de **Cline**, diseñado
 
 ![Demo Visión - Agente Autónomo](assets/screenshots/demo_vision.png)
 ![Dashboard Status - Agente Autónomo](assets/screenshots/dashboard_v2.png)
+![AWS Multi-Cloud - Agente Autónomo](assets/screenshots/aws_list_success.png)
 
 ---
 
 ## 🌟 Características Principales
+
+### 💻 Desarrollo y Orquestación Core
+El agente tiene control total sobre el entorno local para actuar como un ingeniero Senior:
+- **Gestión de Archivos**: Capacidad para `leer`, `escribir`, `editar` (mediante parches inteligentes) y `buscar` en todo el proyecto.
+- **Navegación Web Real**: Capacidad de `navegar por internet`, extraer información de sitios, investigar documentación y utilizar herramientas web de forma autónoma.
+- **Terminal Inteligente**: Ejecución de comandos, instalación de paquetes y gestión de procesos en tiempo real.
 
 ### ☁️ Multi-Cloud, On-Premise & DevOps
 Gestiona infraestructura híbrida de forma inteligente y segura:
