@@ -129,3 +129,9 @@ Este proyecto está bajo la licencia **MIT**. Siéntete libre de usarlo, modific
 
 ---
 *Hecho por [LordZero](https://github.com/jorgeurtubiam-ship-it) - 2026*
+
+## 🏷️ Hashtags & Difusión
+
+Si compartes este proyecto, ¡usa estos hashtags para llegar a más gente!
+
+#AI #AutonomousAgents #DevOps #CloudComputing #MultiCloud #AWS #Azure #GCP #OCI #Nagios #Rundeck #ComputerVision #Ollama #OpenSource #FastAPI #Python #AIAgent #TechInnovation
