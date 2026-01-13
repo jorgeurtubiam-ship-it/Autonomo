@@ -670,12 +670,12 @@ function updateSidebarStatus(data) {
     } else if (data.tool === 'oci_list_instances') {
         const ociVal = document.querySelector('#statusOCI .status-value');
         if (ociVal) ociVal.textContent = 'CONECTADO';
+    } else if (data.tool === 'aws_list_instances' || (data.tool === 'execute_command' && (data.arguments.command || '').includes('aws'))) {
+        const awsVal = document.querySelector('#statusAWS .status-value');
+        if (awsVal) awsVal.textContent = 'ACTIVO';
     } else if (data.tool === 'dremio_query' || data.tool === 'dremio_list_catalog') {
         const dremioVal = document.querySelector('#statusDremio .status-value');
         if (dremioVal) dremioVal.textContent = 'CONECTADO';
-    } else if (data.tool === 'execute_command' && (data.arguments.command || '').includes('aws')) {
-        const awsVal = document.querySelector('#statusAWS .status-value');
-        if (awsVal) awsVal.textContent = 'ACTIVO';
     }
 }
 

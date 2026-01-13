@@ -48,6 +48,9 @@ from .analysis_tools import InfrastructureAnalysisTool
 # OCI
 from .oci_tools import OCITool
 
+# AWS
+from .aws_tools import AWSListInstancesTool
+
 # Checkmk
 from .checkmk_tools import CheckmkTool, CheckmkListHostsTool
 
@@ -96,6 +99,9 @@ __all__ = [
     
     # OCI
     "OCITool",
+    
+    # AWS
+    "AWSListInstancesTool",
     
     # Checkmk
     "CheckmkTool",
@@ -156,6 +162,9 @@ def get_all_tools():
         
         # OCI
         OCITool(),
+        
+        # AWS
+        AWSListInstancesTool(),
         
         # Checkmk
         CheckmkTool(),

@@ -70,6 +70,12 @@ class OCITool:
                     "instruction": "Asegúrate de tener instalada y configurada la OCI CLI ('oci setup config')."
                 }
                 
+        except FileNotFoundError:
+            return {
+                "success": False,
+                "error": "Comando 'oci' no encontrado.",
+                "instruction": "Instala la OCI CLI e intenta nuevamente."
+            }
         except Exception as e:
             logger.error(f"Error en OCITool: {str(e)}")
             return {"success": False, "error": str(e)}
