@@ -7,6 +7,8 @@
 
 Un potente agente autónomo inspirado en la arquitectura de **Cline**, diseñado para automatizar operaciones de IT, desarrollo de software y gestión de infraestructura multi-cloud. Equipado con capacidades de **Visión en tiempo real**, este agente puede "ver" a través de tu móvil para ayudarte a debugear hardware, monitores o entornos físicos.
 
+![Demo Visión - Agente Autónomo](assets/screenshots/demo_vision.png)
+
 ---
 
 ## 🌟 Características Principales
