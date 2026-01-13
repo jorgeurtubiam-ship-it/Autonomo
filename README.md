@@ -13,10 +13,13 @@ Un potente agente autónomo inspirado en la arquitectura de **Cline**, diseñado
 
 ## 🌟 Características Principales
 
-### ☁️ Administración Multi-Cloud & DevOps
-Gestiona tu infraestructura de forma conversacional. El agente puede operar sobre:
+### ☁️ Multi-Cloud, On-Premise & DevOps
+Gestiona infraestructura híbrida de forma inteligente y segura:
 - **Cloud Providers**: AWS, Azure, Google Cloud (GCP), Oracle Cloud (OCI).
-- **Observabilidad**: Integración nativa para consulta y gestión de **Nagios**, **Zabbix** y **Prometheus**.
+- **Optimización de Costos**: El agente analiza tus recursos y da recomendaciones críticas para reducir gastos en la nube.
+- **Provisionamiento IA**: Crea máquinas virtuales (VMs) y recursos siguiendo mejores prácticas, recomendando el tamaño exacto según tus necesidades.
+- **On-Premise Ready**: Diseñado para funcionar en entornos locales, privados y seguros (Air-gapped) mediante el uso de modelos locales como Ollama.
+- **Observabilidad**: Integración nativa con **Nagios**, **Zabbix** y **Prometheus**.
 - **Automatización**: Ejecución de jobs en **Rundeck**, gestión de pipelines y scripts complejos.
 - **APIs**: Capacidad de interactuar con cualquier API REST/JSON (Kubernetes, VMware, etc.).
 
@@ -94,11 +97,13 @@ graph TD
 
 ## 💡 Ejemplos de lo que puede hacer por ti
 
-> "Revisa las instancias de **AWS** en 'us-east-1' que tengan la tag 'Producción' y dime si alguna tiene uso de CPU > 90%."
+> "Analiza mis facturas de **AWS** del último mes y dime 5 acciones para reducir costos inmediatamente."
+
+> "Crea una instancia EC2 en AWS de tipo 't3.medium' con Ubuntu 22.04, pero antes dime si hay una opción más barata que cumpla mis requisitos."
 
 > "Mira a través de mi cámara (Visión) y dime qué cables están mal conectados en este rack."
 
-> "Conéctate a **Nagios**, busca las alertas críticas de la última hora y genera un reporte en un archivo markdown."
+> "Conéctate a mi servidor local de **Nagios** (On-Premise), busca las alertas críticas y genera un reporte."
 
 > "Lanza el job 'Backup-DB' en **Rundeck** y avísame cuando termine consultando los logs."
 
