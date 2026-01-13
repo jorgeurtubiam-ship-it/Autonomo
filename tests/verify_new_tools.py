@@ -20,7 +20,8 @@ def verify_registration():
         "dremio_list_catalog",
         "checkmk_get_alerts",
         "checkmk_list_hosts",
-        "aws_list_instances"
+        "aws_list_instances",
+        "nagios_get_alerts"
     ]
     
     print("\n--- Verificación de Registro de Herramientas ---")

@@ -620,6 +620,13 @@ function showToolResult(data) {
         return;
     }
 
+    if (data.tool === 'nagios_get_alerts' && data.success) {
+        const reportDiv = createNagiosReport(data.result);
+        contentDiv.appendChild(reportDiv);
+        scrollToBottom();
+        return;
+    }
+
     // Fallback if not a terminal tool or specialized tool
     const resultDiv = document.createElement('div');
     resultDiv.className = `tool-result ${data.success ? 'success' : 'error'}`;
@@ -659,6 +666,13 @@ function updateSidebarStatus(data) {
             const count = data.result.count || 0;
             zabbixVal.textContent = count > 0 ? `${count} Alertas` : 'OK';
             zabbixVal.style.color = count > 0 ? 'var(--danger)' : 'var(--success)';
+        }
+    } else if (data.tool === 'nagios_get_alerts') {
+        const nagiosVal = document.querySelector('#statusNagios .status-value');
+        if (nagiosVal) {
+            const count = data.result.count || 0;
+            nagiosVal.textContent = count > 0 ? `${count} Alertas` : 'OK';
+            nagiosVal.style.color = count > 0 ? 'var(--danger)' : 'var(--success)';
         }
     } else if (data.tool === 'checkmk_get_alerts') {
         const checkVal = document.querySelector('#statusCheckmk .status-value');
@@ -721,6 +735,66 @@ function createAnalysisReport(res) {
                     <th>Hallazgo</th>
                     <th>Recomendación</th>
                     <th>Prioridad</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rowsHtml}
+            </tbody>
+        </table>
+    `;
+    return div;
+}
+
+// Create Nagios Alerts Report
+function createNagiosReport(res) {
+    const div = document.createElement('div');
+    div.className = 'analysis-report nagios-report';
+
+    const summary = res.summary || {};
+    const problems = res.problems || [];
+
+    let rowsHtml = problems.map(prob => {
+        const statusClass = prob.status === 2 ? 'severity-High' : (prob.status === 1 ? 'severity-Medium' : 'severity-Low');
+        const statusText = prob.status === 2 ? 'CRITICAL' : (prob.status === 1 ? 'WARNING' : 'UNKNOWN');
+        return `
+            <tr>
+                <td>${escapeHtml(prob.host)}</td>
+                <td>${escapeHtml(prob.service)}</td>
+                <td><span class="${statusClass}">${statusText}</span></td>
+                <td><small>${escapeHtml(prob.output)}</small></td>
+            </tr>
+        `;
+    }).join('');
+
+    if (problems.length === 0) {
+        rowsHtml = '<tr><td colspan="4" style="text-align:center; padding: 20px;">✅ Todos los servicios están en estado OK.</td></tr>';
+    }
+
+    div.innerHTML = `
+        <div class="analysis-header">
+            <span class="analysis-title">🔍 Alertado de Nagios</span>
+            <div class="analysis-summary">
+                <div class="summary-stat">
+                    <span class="summary-value">${summary.ok || 0}</span>
+                    <span class="summary-label">OK</span>
+                </div>
+                <div class="summary-stat" style="color: var(--warning)">
+                    <span class="summary-value">${summary.warning || 0}</span>
+                    <span class="summary-label">Warn</span>
+                </div>
+                <div class="summary-stat" style="color: var(--danger)">
+                    <span class="summary-value">${summary.critical || 0}</span>
+                    <span class="summary-label">Crit</span>
+                </div>
+            </div>
+        </div>
+        <table class="analysis-table">
+            <thead>
+                <tr>
+                    <th>Host</th>
+                    <th>Servicio</th>
+                    <th>Estado</th>
+                    <th>Información</th>
                 </tr>
             </thead>
             <tbody>

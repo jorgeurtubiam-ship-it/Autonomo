@@ -1,0 +1,100 @@
+"""
+Nagios Tools - Herramientas para interactuar con Nagios Monitoring
+"""
+
+import aiohttp
+import logging
+import os
+import json
+from typing import Dict, Any, List, Optional
+from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
+
+class NagiosTool:
+    """Tool para obtener alertas y estado de Nagios"""
+    
+    name = "nagios_get_alerts"
+    description = "Obtiene alertas críticas y advertencias de Nagios Monitoring. Retorna un resumen de estados y lista de problemas."
+    category = "observability"
+
+    def __init__(self, url: Optional[str] = None, user: Optional[str] = None, password: Optional[str] = None):
+        # Intentar obtener de variables de entorno o usar defaults del script del usuario
+        self.base_url = url or os.getenv("NAGIOS_URL", "http://localhost:8080/nagios")
+        self.user = user or os.getenv("NAGIOS_USER", "nagiosadmin")
+        self.password = password or os.getenv("NAGIOS_PASSWORD", "nagios@2025")
+
+    async def execute(self, query_type: str = "servicecount") -> Dict[str, Any]:
+        """
+        Consulta la API JSON de Nagios (statusjson.cgi)
+        """
+        # Limpiar URL base para asegurar que apunta al CGI
+        base = self.base_url.rstrip('/')
+        if not base.endswith('cgi-bin'):
+            api_url = f"{base}/cgi-bin/statusjson.cgi"
+        else:
+            api_url = f"{base}/statusjson.cgi"
+
+        async with aiohttp.ClientSession() as session:
+            auth = aiohttp.BasicAuth(self.user, self.password)
+            
+            try:
+                # 1. Obtener conteos (Resumen)
+                async with session.get(f"{api_url}?query=servicecount", auth=auth, timeout=10) as resp:
+                    if resp.status != 200:
+                        return {"success": False, "error": f"Nagios retornó status {resp.status}", "url": api_url}
+                    
+                    data = await resp.json()
+                    counts = data.get('data', {}).get('count', {})
+                    
+                # 2. Obtener lista de servicios con problemas
+                async with session.get(f"{api_url}?query=servicelist", auth=auth, timeout=10) as resp:
+                    if resp.status == 200:
+                        list_data = await resp.json()
+                        services = list_data.get('data', {}).get('servicelist', {})
+                        
+                        # Filtrar problemas (status > 0)
+                        problems = []
+                        for s_key, s_val in services.items():
+                            if s_val.get('status', 0) > 0:
+                                problems.append({
+                                    "host": s_val.get('host_name'),
+                                    "service": s_val.get('description'),
+                                    "status": s_val.get('status'),
+                                    "output": s_val.get('plugin_output')
+                                })
+                    else:
+                        problems = []
+
+                return {
+                    "success": True,
+                    "summary": {
+                        "ok": counts.get('ok', 0),
+                        "warning": counts.get('warning', 0),
+                        "critical": counts.get('critical', 0),
+                        "unknown": counts.get('unknown', 0),
+                        "total": counts.get('all', 0)
+                    },
+                    "problems": problems[:20], # Limitar a los primeros 20
+                    "count": counts.get('critical', 0) + counts.get('warning', 0)
+                }
+
+            except Exception as e:
+                logger.error(f"Error consultando Nagios: {e}")
+                return {"success": False, "error": str(e)}
+
+    def get_definition(self) -> Dict[str, Any]:
+        return {
+            "name": self.name,
+            "description": self.description,
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query_type": {
+                        "type": "string",
+                        "description": "Tipo de consulta (servicecount, hostcount, servicelist). Default servicecount.",
+                        "default": "servicecount"
+                    }
+                }
+            }
+        }

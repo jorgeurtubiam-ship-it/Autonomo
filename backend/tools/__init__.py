@@ -42,6 +42,9 @@ from .zabbix_tools import ZabbixTool
 # Rundeck
 from .rundeck_tools import RundeckTool, RundeckListTool
 
+# Nagios
+from .nagios_tools import NagiosTool
+
 # Analysis
 from .analysis_tools import InfrastructureAnalysisTool
 
@@ -93,6 +96,9 @@ __all__ = [
     # Rundeck
     "RundeckTool",
     "RundeckListTool",
+    
+    # Nagios
+    "NagiosTool",
     
     # Analysis
     "InfrastructureAnalysisTool",
@@ -156,6 +162,9 @@ def get_all_tools():
         # Rundeck
         RundeckTool(),
         RundeckListTool(),
+        
+        # Nagios
+        NagiosTool(),
         
         # Analysis
         InfrastructureAnalysisTool(),
