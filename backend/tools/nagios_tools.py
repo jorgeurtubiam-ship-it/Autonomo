@@ -15,7 +15,7 @@ class NagiosTool:
     """Tool para obtener alertas y estado de Nagios"""
     
     name = "nagios_get_alerts"
-    description = "Obtiene alertas críticas y advertencias de Nagios Monitoring. Retorna un resumen de estados y lista de problemas."
+    description = "HERRAMIENTA PREFERIDA para Nagios. Obtiene alertas críticas y advertencias de Nagios (CGI o JSON). Úsala para cualquier solicitud relacionada con 'alertas de nagios', 'estado de nagios' o monitoreo de hosts/servicios en Nagios."
     category = "observability"
 
     def __init__(self, url: Optional[str] = None, user: Optional[str] = None, password: Optional[str] = None):
@@ -34,16 +34,17 @@ class NagiosTool:
         target_password = password or self.password
 
         # Asegurar que apunta al CGI
+        base = target_url.rstrip('/')
         if "statusjson.cgi" in target_url:
             api_url = target_url
+        elif base.endswith('.cgi'):
+             api_url = target_url
         else:
-            base = target_url.rstrip('/')
             if base.endswith('cgi-bin'):
                 api_url = f"{base}/statusjson.cgi"
             elif base.endswith('/nagios'):
                 api_url = f"{base}/cgi-bin/statusjson.cgi"
             else:
-                # Intento genérico
                 api_url = f"{base}/nagios/cgi-bin/statusjson.cgi" if "/nagios" not in base else f"{base}/cgi-bin/statusjson.cgi"
 
         async with aiohttp.ClientSession() as session:
@@ -58,7 +59,7 @@ class NagiosTool:
                             "success": False, 
                             "error": f"Nagios retornó status {resp.status}", 
                             "url": api_url,
-                            "hint": "Verifica que el usuario y contraseña sean correctos y que la URL sea accesible."
+                            "hint": "Verifica que el usuario y contraseña sean correctos y que la URL sea accesible desde el backend."
                         }
                     
                     data = await resp.json()
@@ -66,22 +67,45 @@ class NagiosTool:
                     
                 # 2. Obtener lista de servicios con problemas
                 async with session.get(f"{api_url}?query=servicelist", auth=auth, timeout=10) as resp:
+                    problems = []
                     if resp.status == 200:
                         list_data = await resp.json()
-                        services = list_data.get('data', {}).get('servicelist', {})
+                        data_content = list_data.get('data', {})
+                        services_raw = data_content.get('servicelist', {})
                         
-                        # Filtrar problemas (status > 0)
-                        problems = []
-                        for s_key, s_val in services.items():
-                            if s_val.get('status', 0) > 0:
-                                problems.append({
-                                    "host": s_val.get('host_name'),
-                                    "service": s_val.get('description'),
-                                    "status": s_val.get('status'),
-                                    "output": s_val.get('plugin_output')
-                                })
-                    else:
-                        problems = []
+                        # Mapeo de bitmasks Nagios a códigos internos (0=OK, 1=WARN, 2=CRIT, 3=UNK)
+                        # 2=OK, 4=WARN, 8=UNK, 16=CRIT
+                        bitmask_map = {16: 2, 4: 1, 8: 3, 2: 0}
+                        
+                        if isinstance(services_raw, dict):
+                            for h_name, s_dict in services_raw.items():
+                                if isinstance(s_dict, dict):
+                                    for s_desc, val in s_dict.items():
+                                        # Si val es dict (detallado) o int (bitmask)
+                                        status = val if isinstance(val, int) else val.get('status', 0)
+                                        mapped_status = bitmask_map.get(status, 1 if status > 0 else 0)
+                                        
+                                        if mapped_status > 0:
+                                            problems.append({
+                                                "host": h_name,
+                                                "service": s_desc,
+                                                "status": mapped_status,
+                                                "output": val.get('plugin_output', 'Ver Nagios para detalles') if isinstance(val, dict) else f"Status Bitmask: {status}"
+                                            })
+                        elif isinstance(services_raw, list):
+                            for s_val in services_raw:
+                                status = s_val.get('status', 0)
+                                mapped_status = bitmask_map.get(status, 1 if status > 0 else 0)
+                                if mapped_status > 0:
+                                    problems.append({
+                                        "host": s_val.get('host_name', 'Unknown'),
+                                        "service": s_val.get('description', 'Unknown'),
+                                        "status": mapped_status,
+                                        "output": s_val.get('plugin_output', 'No info')
+                                    })
+
+                # Ordenar por severidad (CRIT primero)
+                problems.sort(key=lambda x: x['status'], reverse=True)
 
                 return {
                     "success": True,
@@ -92,7 +116,7 @@ class NagiosTool:
                         "unknown": counts.get('unknown', 0),
                         "total": counts.get('all', 0)
                     },
-                    "problems": problems[:20], # Limitar a los primeros 20
+                    "problems": problems[:50],
                     "count": counts.get('critical', 0) + counts.get('warning', 0)
                 }
 
