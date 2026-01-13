@@ -10,6 +10,7 @@ Un potente agente autónomo inspirado en la arquitectura de **Cline**, diseñado
 ![Demo Visión - Agente Autónomo](assets/screenshots/demo_vision.png)
 ![Dashboard Status - Agente Autónomo](assets/screenshots/dashboard_v2.png)
 ![AWS Multi-Cloud - Agente Autónomo](assets/screenshots/aws_list_success.png)
+![Nagios Integration - Agente Autónomo](assets/screenshots/nagios_alerts_success.png)
 
 ---
 
@@ -26,7 +27,8 @@ Gestiona infraestructura híbrida de forma inteligente y segura:
 - **Multi-Cloud Management**: Direct orchestration for **AWS**, **OCI** (Oracle Cloud), and infrastructure analysis.
 - **Cost Optimization**: Intelligent engine that analyzes cloud resources and generates visual reports with actionable recommendations.
 - **Observability specialized**:
-  - **Zabbix & Checkmk**: Native integration to fetch and visualize critical alerts.
+  - **Nagios**: Native integration via JSON API to fetch host/service alerts with bitmask status mapping.
+  - **Zabbix & Checkmk**: Real-time integration to fetch and visualize critical triggers.
   - **Dremio Data Lake**: SQL query execution and catalog exploration with tabular data visualization.
 - **Automation**: **Rundeck** integration to trigger existing runbooks and automation jobs.
 - **Advanced UI**: Real-time infrastructure status sidebar and professional report rendering.
