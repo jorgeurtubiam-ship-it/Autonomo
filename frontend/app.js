@@ -574,8 +574,32 @@ function showToolResult(data) {
     // Update Sidebar Status based on tool results
     updateSidebarStatus(data);
 
+    // 1. Prioritize specialized visual reports
+    if (data.success) {
+        if (data.tool === 'analyze_cloud_resources') {
+            const reportDiv = createAnalysisReport(data.result);
+            contentDiv.appendChild(reportDiv);
+            scrollToBottom();
+            return;
+        }
+
+        if (data.tool === 'dremio_query') {
+            const tableDiv = createDremioResultsTable(data.result);
+            contentDiv.appendChild(tableDiv);
+            scrollToBottom();
+            return;
+        }
+
+        if (data.tool === 'nagios_get_alerts') {
+            const reportDiv = createNagiosReport(data.result);
+            contentDiv.appendChild(reportDiv);
+            scrollToBottom();
+            return;
+        }
+    }
+
+    // 2. Terminal output handling
     if (terminalId) {
-        // ... (terminal logic remains same)
         const terminal = document.getElementById(terminalId);
         if (terminal) {
             const outputs = terminal.querySelectorAll('.terminal-output');
@@ -603,28 +627,6 @@ function showToolResult(data) {
             scrollToBottom();
             return;
         }
-    }
-
-    // Special handling for Infrastructure Analysis or Data Queries
-    if (data.tool === 'analyze_cloud_resources' && data.success) {
-        const reportDiv = createAnalysisReport(data.result);
-        contentDiv.appendChild(reportDiv);
-        scrollToBottom();
-        return;
-    }
-
-    if (data.tool === 'dremio_query' && data.success) {
-        const tableDiv = createDremioResultsTable(data.result);
-        contentDiv.appendChild(tableDiv);
-        scrollToBottom();
-        return;
-    }
-
-    if (data.tool === 'nagios_get_alerts' && data.success) {
-        const reportDiv = createNagiosReport(data.result);
-        contentDiv.appendChild(reportDiv);
-        scrollToBottom();
-        return;
     }
 
     // Fallback if not a terminal tool or specialized tool
