@@ -36,6 +36,24 @@ from .browser_tool import BrowserTool
 # Vision
 from .vision_tools import VisionTool, VisionPointTool
 
+# Zabbix
+from .zabbix_tools import ZabbixTool
+
+# Rundeck
+from .rundeck_tools import RundeckTool, RundeckListTool
+
+# Analysis
+from .analysis_tools import InfrastructureAnalysisTool
+
+# OCI
+from .oci_tools import OCITool
+
+# Checkmk
+from .checkmk_tools import CheckmkTool, CheckmkListHostsTool
+
+# Dremio
+from .dremio_tools import DremioQueryTool, DremioCatalogTool
+
 __all__ = [
     # File Operations
     "ReadFileTool",
@@ -65,6 +83,27 @@ __all__ = [
     # Vision
     "VisionTool",
     "VisionPointTool",
+    
+    # Zabbix
+    "ZabbixTool",
+    
+    # Rundeck
+    "RundeckTool",
+    "RundeckListTool",
+    
+    # Analysis
+    "InfrastructureAnalysisTool",
+    
+    # OCI
+    "OCITool",
+    
+    # Checkmk
+    "CheckmkTool",
+    "CheckmkListHostsTool",
+    
+    # Dremio
+    "DremioQueryTool",
+    "DremioCatalogTool",
 ]
 
 
@@ -104,4 +143,25 @@ def get_all_tools():
         # Vision
         VisionTool(),
         VisionPointTool(),
+        
+        # Zabbix
+        ZabbixTool(),
+        
+        # Rundeck
+        RundeckTool(),
+        RundeckListTool(),
+        
+        # Analysis
+        InfrastructureAnalysisTool(),
+        
+        # OCI
+        OCITool(),
+        
+        # Checkmk
+        CheckmkTool(),
+        CheckmkListHostsTool(),
+        
+        # Dremio
+        DremioQueryTool(),
+        DremioCatalogTool(),
     ]

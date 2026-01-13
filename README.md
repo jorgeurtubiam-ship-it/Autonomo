@@ -15,13 +15,54 @@ Un potente agente autónomo inspirado en la arquitectura de **Cline**, diseñado
 
 ### ☁️ Multi-Cloud, On-Premise & DevOps
 Gestiona infraestructura híbrida de forma inteligente y segura:
-- **Cloud Providers**: AWS, Azure, Google Cloud (GCP), Oracle Cloud (OCI).
-- **Optimización de Costos**: El agente analiza tus recursos y da recomendaciones críticas para reducir gastos en la nube.
-- **Provisionamiento IA**: Crea máquinas virtuales (VMs) y recursos siguiendo mejores prácticas, recomendando el tamaño exacto según tus necesidades.
-- **On-Premise Ready**: Diseñado para funcionar en entornos locales, privados y seguros (Air-gapped) mediante el uso de modelos locales como Ollama.
-- **Observabilidad**: Integración nativa con **Nagios**, **Zabbix** y **Prometheus**.
-- **Automatización**: Ejecución de jobs en **Rundeck**, gestión de pipelines y scripts complejos.
-- **APIs**: Capacidad de interactuar con cualquier API REST/JSON (Kubernetes, VMware, etc.).
+- **Multi-Cloud Management**: Direct orchestration for **AWS**, **OCI** (Oracle Cloud), and infrastructure analysis.
+- **Cost Optimization**: Intelligent engine that analyzes cloud resources and generates visual reports with actionable recommendations.
+- **Observability specialized**:
+  - **Zabbix & Checkmk**: Native integration to fetch and visualize critical alerts.
+  - **Dremio Data Lake**: SQL query execution and catalog exploration with tabular data visualization.
+- **Automation**: **Rundeck** integration to trigger existing runbooks and automation jobs.
+- **Advanced UI**: Real-time infrastructure status sidebar and professional report rendering.
+
+## 🚀 Quick Start
+
+### 1. Requirements
+- Python 3.10+
+- Node.js (for frontend)
+- Playwright (`pip install playwright && playwright install`)
+- Cloud/Monitoring credentials in `.env`
+
+### 2. Environment Setup
+Create a `.env` file based on `.env.example`:
+```bash
+# Cloud & Tools
+AWS_ACCESS_KEY_ID=...
+OCI_CONFIG_FILE=...
+ZABBIX_URL=...
+CHECKMK_URL=...
+DREMIO_HOSTNAME=...
+RUNDECK_URL=...
+```
+
+### 3. Launching the App
+Run the backend:
+```bash
+cd backend
+python main.py
+```
+Open the frontend:
+```bash
+# Simply open frontend/index.html in your browser or use a live server
+```
+
+## 🛠️ Integrated Tools
+| Tool | Category | Description |
+| --- | --- | --- |
+| `zabbix_get_alerts` | Observability | Fetch active triggers from Zabbix |
+| `checkmk_get_alerts` | Observability | Fetch service issues from Checkmk |
+| `dremio_query` | Data | Execute SQL in Dremio Data Lake |
+| `rundeck_run_job` | Automation | Run Rundeck jobs by ID |
+| `analyze_cloud_resources` | Cloud | Generate optimization reports |
+| `oci_list_instances` | Cloud | List OCI compute instances |
 
 ### 👁️ Visión Activa (Cámara Móvil)
 Unica funcionalidad que permite al agente ver lo que tú ves:

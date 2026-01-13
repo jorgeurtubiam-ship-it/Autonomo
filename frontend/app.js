@@ -571,14 +571,15 @@ function showToolResult(data) {
     const terminalId = currentAssistantMessageDiv.dataset.currentTerminal;
     const contentDiv = currentAssistantMessageDiv.querySelector('.message-content');
 
+    // Update Sidebar Status based on tool results
+    updateSidebarStatus(data);
+
     if (terminalId) {
+        // ... (terminal logic remains same)
         const terminal = document.getElementById(terminalId);
         if (terminal) {
-            // Encontrar el último output-div (el del comando más reciente)
             const outputs = terminal.querySelectorAll('.terminal-output');
             const outputDiv = outputs[outputs.length - 1];
-
-            // Eliminar todos los cursores previos
             const cursors = terminal.querySelectorAll('.terminal-cursor');
             cursors.forEach(c => c.remove());
 
@@ -586,12 +587,9 @@ function showToolResult(data) {
             if (data.success) {
                 const res = data.result;
                 if (res && typeof res === 'object') {
-                    // Si es un tool de comando, priorizar stdout/stderr
                     if (res.stdout !== undefined || res.stderr !== undefined) {
                         resultText = res.stdout || '';
-                        if (res.stderr) {
-                            resultText += `\nError:\n${res.stderr}`;
-                        }
+                        if (res.stderr) resultText += `\nError:\n${res.stderr}`;
                     } else {
                         resultText = JSON.stringify(res, null, 2);
                     }
@@ -601,21 +599,28 @@ function showToolResult(data) {
             } else {
                 resultText = `Error: ${data.error || 'Unknown error'}`;
             }
-
-            if (outputDiv) {
-                outputDiv.textContent = resultText;
-            }
-
-            // Solo si es un terminal único o último comando, podemos considerar quitar la ref
-            // Pero mejor dejarla por si vienen más commands en el mismo bloque de respuesta del LLM
-            // delete currentAssistantMessageDiv.dataset.currentTerminal;
-
+            if (outputDiv) outputDiv.textContent = resultText;
             scrollToBottom();
             return;
         }
     }
 
-    // Fallback if not a terminal tool
+    // Special handling for Infrastructure Analysis or Data Queries
+    if (data.tool === 'analyze_cloud_resources' && data.success) {
+        const reportDiv = createAnalysisReport(data.result);
+        contentDiv.appendChild(reportDiv);
+        scrollToBottom();
+        return;
+    }
+
+    if (data.tool === 'dremio_query' && data.success) {
+        const tableDiv = createDremioResultsTable(data.result);
+        contentDiv.appendChild(tableDiv);
+        scrollToBottom();
+        return;
+    }
+
+    // Fallback if not a terminal tool or specialized tool
     const resultDiv = document.createElement('div');
     resultDiv.className = `tool-result ${data.success ? 'success' : 'error'}`;
 
@@ -643,6 +648,122 @@ function showToolResult(data) {
     contentDiv.appendChild(resultDiv);
     scrollToBottom();
 }
+
+// Helper to update sidebar status indicators
+function updateSidebarStatus(data) {
+    if (!data.success) return;
+
+    if (data.tool === 'zabbix_get_alerts') {
+        const zabbixVal = document.querySelector('#statusZabbix .status-value');
+        if (zabbixVal) {
+            const count = data.result.count || 0;
+            zabbixVal.textContent = count > 0 ? `${count} Alertas` : 'OK';
+            zabbixVal.style.color = count > 0 ? 'var(--danger)' : 'var(--success)';
+        }
+    } else if (data.tool === 'checkmk_get_alerts') {
+        const checkVal = document.querySelector('#statusCheckmk .status-value');
+        if (checkVal) {
+            const count = data.result.count || 0;
+            checkVal.textContent = count > 0 ? `${count} Alertas` : 'OK';
+            checkVal.style.color = count > 0 ? 'var(--danger)' : 'var(--success)';
+        }
+    } else if (data.tool === 'oci_list_instances') {
+        const ociVal = document.querySelector('#statusOCI .status-value');
+        if (ociVal) ociVal.textContent = 'CONECTADO';
+    } else if (data.tool === 'dremio_query' || data.tool === 'dremio_list_catalog') {
+        const dremioVal = document.querySelector('#statusDremio .status-value');
+        if (dremioVal) dremioVal.textContent = 'CONECTADO';
+    } else if (data.tool === 'execute_command' && (data.arguments.command || '').includes('aws')) {
+        const awsVal = document.querySelector('#statusAWS .status-value');
+        if (awsVal) awsVal.textContent = 'ACTIVO';
+    }
+}
+
+// Create Visual Analysis Report
+function createAnalysisReport(res) {
+    const div = document.createElement('div');
+    div.className = 'analysis-report';
+
+    const recommendations = res.recommendations || [];
+    const summary = res.summary || {};
+
+    let rowsHtml = recommendations.map(rec => `
+        <tr>
+            <td>${escapeHtml(rec.resource_id)}</td>
+            <td>${escapeHtml(rec.issue)}</td>
+            <td>${escapeHtml(rec.recommendation)}</td>
+            <td><span class="severity-${rec.severity}">${escapeHtml(rec.severity)}</span></td>
+        </tr>
+    `).join('');
+
+    if (recommendations.length === 0) {
+        rowsHtml = '<tr><td colspan="4" style="text-align:center; padding: 20px;">Súper! No se encontraron problemas de optimización.</td></tr>';
+    }
+
+    div.innerHTML = `
+        <div class="analysis-header">
+            <span class="analysis-title">📊 Reporte de Optimización (${res.provider.toUpperCase()})</span>
+            <div class="analysis-summary">
+                <div class="summary-stat">
+                    <span class="summary-value">${summary.total_resources || 0}</span>
+                    <span class="summary-label">Recursos</span>
+                </div>
+                <div class="summary-stat" style="color: ${summary.optimizable > 0 ? 'var(--warning)' : 'var(--success)'}">
+                    <span class="summary-value">${summary.optimizable || 0}</span>
+                    <span class="summary-label">Optimizables</span>
+                </div>
+            </div>
+        </div>
+        <table class="analysis-table">
+            <thead>
+                <tr>
+                    <th>Recurso</th>
+                    <th>Hallazgo</th>
+                    <th>Recomendación</th>
+                    <th>Prioridad</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rowsHtml}
+            </tbody>
+        </table>
+    `;
+    return div;
+}
+
+// Create Dremio Results Table
+function createDremioResultsTable(res) {
+    const div = document.createElement('div');
+    div.className = 'analysis-report dremio-results';
+
+    const rows = res.data || [];
+    if (rows.length === 0) {
+        div.innerHTML = '<div class="analysis-header"><span class="analysis-title">📊 Dremio: Sin resultados</span></div>';
+        return div;
+    }
+
+    const headers = Object.keys(rows[0]);
+    const headerHtml = headers.map(h => `<th>${escapeHtml(h)}</th>`).join('');
+    const rowsHtml = rows.map(row => `
+        <tr>
+            ${headers.map(h => `<td>${escapeHtml(String(row[h]))}</td>`).join('')}
+        </tr>
+    `).join('');
+
+    div.innerHTML = `
+        <div class="analysis-header">
+            <span class="analysis-title">📊 Resultados Dremio (Job: ${res.job_id.substring(0, 8)}...)</span>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="analysis-table">
+                <thead><tr>${headerHtml}</tr></thead>
+                <tbody>${rowsHtml}</tbody>
+            </table>
+        </div>
+    `;
+    return div;
+}
+
 
 // Global modal handlers
 function openResultModal(title, content) {
