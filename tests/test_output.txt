@@ -1,0 +1,3 @@
+Este es un test funcional
+Línea 2
+Línea 3

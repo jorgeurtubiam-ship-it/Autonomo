@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agente Autónomo - Chat</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🤖 Agente Autónomo</h1>
+                <button id="newChatBtn" class="btn-new-chat">
+                    <span>+</span> Nueva Conversación
+                </button>
+                <button id="visionBtn" class="btn-vision-sidebar">
+                    <span>👁️</span> Activar Visión
+                </button>
+            </div>
+
+            <div class="conversations-list" id="conversationsList">
+                <div class="loading">Cargando conversaciones...</div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">Conectando...</span>
+                </div>
+                <div class="model-info">
+                    <select id="providerSelect" class="provider-select">
+                        <option value="ollama">Ollama</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Anthropic</option>
+                        <option value="deepseek">DeepSeek</option>
+                    </select>
+                    <select id="modelSelect" class="model-select">
+                        <option value="llama3.2:latest">llama3.2:latest</option>
+                        <option value="llama2">llama2</option>
+                        <option value="codellama">codellama</option>
+                        <option value="mistral">mistral</option>
+                    </select>
+                    <select id="autonomySelect" class="model-select">
+                        <option value="semi">Modo Semi-Autónomo (Con Permiso)</option>
+                        <option value="full">Modo Autónomo (Sin Permiso)</option>
+                        <option value="supervised">Modo Supervisado (Bloqueo)</option>
+                    </select>
+                    <small id="modelInfo">Ollama llama3.2:latest</small>
+                    <button id="apiKeyBtn" class="btn-api-key" title="Configurar API Keys">🔑</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-container">
+            <div class="chat-header">
+                <div class="chat-title">
+                    <h2 id="chatTitle">Nueva Conversación</h2>
+                    <span class="chat-subtitle" id="chatSubtitle">Pregúntame lo que quieras</span>
+                </div>
+                <div class="chat-actions">
+                    <button class="btn-icon" id="clearBtn" title="Limpiar chat">
+                        🗑️
+                    </button>
+                </div>
+            </div>
+
+            <div class="messages-container" id="messagesContainer">
+                <div class="welcome-message">
+                    <div class="welcome-icon">🤖</div>
+                    <h3>¡Hola! Soy tu Agente Autónomo</h3>
+                    <p>Puedo ayudarte con:</p>
+                    <ul>
+                        <li>📁 Gestión de archivos y directorios</li>
+                        <li>⚙️ Ejecución de comandos</li>
+                        <li>🔧 Operaciones Git</li>
+                        <li>💬 Y mucho más...</li>
+                    </ul>
+                    <p class="welcome-hint">Escribe un mensaje para comenzar</p>
+                </div>
+            </div>
+
+            <div class="input-container">
+                <div class="tool-indicator" id="toolIndicator" style="display: none;">
+                    <span class="tool-icon">🔧</span>
+                    <span id="toolText">Ejecutando herramienta...</span>
+                </div>
+                <form id="messageForm" class="message-form">
+                    <textarea id="messageInput" placeholder="Escribe tu mensaje aquí..." rows="1"></textarea>
+                    <button type="submit" id="sendBtn" class="btn-send">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                </form>
+            </div>
+            <!-- Vision Preview Floating Widget -->
+            <div id="visionPreviewContainer" class="vision-preview" style="display: none;">
+                <div class="vision-preview-header">
+                    <span>👁️ Visión en Vivo</span>
+                    <div>
+                        <button id="toggleMaximize" class="btn-mini" title="Maximizar/Minimizar">🗖</button>
+                        <button id="closeVisionPreview" class="btn-mini" title="Cerrar">×</button>
+                    </div>
+                </div>
+                <img id="visionPreviewImg" src="" alt="Cargando visión...">
+                <div class="vision-preview-footer">
+                    <span id="visionStatus">📡 Conectado</span>
+                    <span id="visionTimestamp">Buscando...</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- API Key Modal -->
+    <div id="apiKeyModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔑 Configurar API Keys</h3>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="api-key-field">
+                    <label for="openaiKey">OpenAI API Key:</label>
+                    <input type="password" id="openaiKey" placeholder="sk-...">
+                </div>
+                <div class="api-key-field">
+                    <label for="anthropicKey">Anthropic API Key:</label>
+                    <input type="password" id="anthropicKey" placeholder="sk-ant-...">
+                </div>
+                <div class="api-key-field">
+                    <label for="deepseekKey">DeepSeek API Key:</label>
+                    <input type="password" id="deepseekKey" placeholder="sk-...">
+                </div>
+                <div class="modal-footer">
+                    <button id="saveApiKeys" class="btn-save">💾 Guardar</button>
+                    <button id="cancelModal" class="btn-cancel">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vision Connection Modal -->
+    <div id="visionModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>👁️ Conectar Visión Móvil</h3>
+                <button class="modal-close" id="closeVisionModal">&times;</button>
+            </div>
+            <div class="modal-body vision-modal-body">
+                <p>Escanea este código con tu celular para que el Agente pueda "ver".</p>
+                <div id="qrContainer" class="qr-container">
+                    <div class="loading">Cargando código QR...</div>
+                </div>
+                <div class="connection-details">
+                    <p>O ingresa manualmente en tu navegador móvil:</p>
+                    <code id="visionUrl">Cargando...</code>
+                </div>
+                <div class="modal-footer">
+                    <button id="closeVisionBtn" class="btn-cancel">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tool Result Modal -->
+    <div id="resultModal" class="modal" style="display: none;">
+        <div class="modal-content result-modal-content">
+            <div class="modal-header">
+                <h3 id="resultModalTitle">🛠️ Resultado de Herramienta</h3>
+                <button class="modal-close" id="closeResultModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="resultModalContent" class="result-modal-body">
+                    <pre><code id="resultModalCode"></code></pre>
+                </div>
+                <div class="modal-footer">
+                    <button id="copyResultBtn" class="btn-save">📋 Copiar JSON</button>
+                    <button id="closeResultBtn" class="btn-cancel">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
