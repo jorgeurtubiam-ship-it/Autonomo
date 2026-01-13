@@ -30,9 +30,11 @@
             </div>
 
             <!-- Infrastructure Status Section -->
-            <div class="sidebar-section infrastructure-status">
-                <div class="section-header">
+            <div class="sidebar-section infrastructure-status" id="infraStatusSection">
+                <div class="section-header" id="toggleInfra"
+                    style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
                     <h3>🌐 Estado Infraestructura</h3>
+                    <span class="toggle-icon" id="infraIcon" style="transition: transform 0.3s ease;">▼</span>
                 </div>
                 <div class="status-grid" id="statusGrid">
                     <div class="status-item" id="statusNagios">

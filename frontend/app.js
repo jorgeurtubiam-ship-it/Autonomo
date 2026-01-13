@@ -1375,3 +1375,16 @@ if (toggleMaximize && visionPreviewContainer) {
         toggleMaximize.textContent = visionPreviewContainer.classList.contains('maximized') ? '🗗' : '🗖';
     });
 }
+// Initialize sidebar toggles
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleInfra = document.getElementById('toggleInfra');
+    const statusGrid = document.getElementById('statusGrid');
+    const infraIcon = document.getElementById('infraIcon');
+
+    if (toggleInfra && statusGrid && infraIcon) {
+        toggleInfra.onclick = () => {
+            const isCollapsed = statusGrid.classList.toggle('collapsed');
+            infraIcon.style.transform = isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+        };
+    }
+});
