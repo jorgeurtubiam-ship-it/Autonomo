@@ -1,234 +1,131 @@
-# Agente Autónomo de Propósito General
+# 🤖 Agente Autónomo de Propósito General (Vision-Ready)
 
-Agente autónomo basado en la arquitectura de **Cline**, capaz de programar, gestionar infraestructura, monitorear sistemas y aprender nuevas APIs dinámicamente.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-orange.svg)](https://ollama.ai)
 
-## 🎯 Características
+Un potente agente autónomo inspirado en la arquitectura de **Cline**, diseñado para automatizar operaciones de IT, desarrollo de software y gestión de infraestructura multi-cloud. Equipado con capacidades de **Visión en tiempo real**, este agente puede "ver" a través de tu móvil para ayudarte a debugear hardware, monitores o entornos físicos.
 
-- 🧠 **Multi-LLM**: OpenAI, Anthropic, DeepSeek, Ollama
-- 📁 **File Operations**: Leer, escribir, buscar archivos
-- ⚡ **Command Execution**: Ejecutar comandos shell y scripts
-- 🔧 **Git Integration**: Status, diff, commit, log
-- ☁️ **Multi-Cloud**: AWS, Azure, GCP (próximamente)
-- 🤖 **Aprendizaje Dinámico**: Aprende APIs desde documentación
-- 🔒 **Seguridad**: Comandos bloqueados, timeouts, validación
+---
+
+## 🌟 Características Principales
+
+### ☁️ Administración Multi-Cloud & DevOps
+Gestiona tu infraestructura de forma conversacional. El agente puede operar sobre:
+- **Cloud Providers**: AWS, Azure, Google Cloud (GCP), Oracle Cloud (OCI).
+- **Observabilidad**: Integración nativa para consulta y gestión de **Nagios**, **Zabbix** y **Prometheus**.
+- **Automatización**: Ejecución de jobs en **Rundeck**, gestión de pipelines y scripts complejos.
+- **APIs**: Capacidad de interactuar con cualquier API REST/JSON (Kubernetes, VMware, etc.).
+
+### 👁️ Visión Activa (Cámara Móvil)
+Unica funcionalidad que permite al agente ver lo que tú ves:
+- **Debugeo Físico**: Apunta la cámara de tu móvil a un servidor, monitor o placa base y pregunta: "¿Qué error ves en el panel frontal?".
+- **OCR Real-time**: Lee logs en pantallas físicas o etiquetas de activos.
+- **Interacción**: El agente puede "señalar" (marcar) objetos en la pantalla de tu móvil para guiarte.
+
+### 🧠 Inteligencia Flexible (Multi-LLM)
+- **Modelos Locales**: Soporte completo para **Ollama** (Llama 3.2, Moondream para visión).
+- **Cloud LLMs**: DeepSeek, OpenAI (GPT-4), Anthropic (Claude 3.5 Sonnet).
+
+---
 
 ## 🚀 Inicio Rápido
 
-### 1. Instalar Dependencias
+### 1. Requisitos
+- Python 3.10+
+- Ollama (opcional, para ejecución 100% local)
 
+### 2. Instalación
 ```bash
+git clone https://github.com/jorgeurtubiam-ship-it/Autonomo.git
+cd Autonomo
 pip install -r requirements.txt
 ```
 
-### 2. Configurar API Key
-
+### 3. Configuración
+Crea un archivo `.env` basado en `.env.example`:
 ```bash
-# Opción 1: DeepSeek (recomendado)
-export DEEPSEEK_API_KEY="sk-..."
-
-# Opción 2: OpenAI
-export OPENAI_API_KEY="sk-..."
-
-# Opción 3: Anthropic
-export ANTHROPIC_API_KEY="sk-ant-..."
-
-# Opción 4: Ollama (local, gratis)
-ollama serve
+cp .env.example .env
+# Edita con tus llaves o usa Ollama por defecto
 ```
 
-### 3. Ejecutar Ejemplo
-
-```python
-import asyncio
-from agent import AgentCore, AgentConfig, create_llm_provider
-from tools import get_all_tools
-
-async def main():
-    # Crear agente
-    llm = create_llm_provider("deepseek")
-    agent = AgentCore(llm, AgentConfig())
-    
-    # Registrar tools
-    for tool in get_all_tools():
-        agent.register_tool(tool)
-    
-    # Usar el agente
-    async for event in agent.process_message(
-        "Crea un archivo hello.txt con 'Hola Mundo'",
-        "conv_001"
-    ):
-        if event["type"] == "message":
-            print(event["content"])
-
-asyncio.run(main())
-```
-
-O ejecuta el ejemplo completo:
-
+### 4. Lanzamiento
+El sistema incluye un dashboard web con terminal integrada y streaming de video.
 ```bash
-python examples/basic_usage.py
+./start_all.sh
 ```
+Accede a: `http://localhost:3000`
 
-## 📚 Documentación
+---
 
-Para una guía detallada, consulta nuestro **[Índice de Documentación](Docs/README.md)**.
+## 🛠️ Herramientas del Sistema (Tools)
 
-- [Guía de Inicio Rápido](Docs/QUICKSTART.md) ⭐
-- [Arquitectura del Sistema](Docs/ARCHITECTURE.md)
-- [Referencia de API](Docs/API_REFERENCE.md)
-- [Interfaz de Usuario](Docs/USER_INTERFACE.md)
-- [Crear Tools Personalizados](Docs/development/custom-tools.md)
+El agente utiliza el ciclo **Plan & Act** para ejecutar tareas usando sus herramientas:
 
-## 🛠️ Tools Disponibles
+- **Operaciones de Archivo**: `read`, `write`, `search`, `list`, `patch`.
+- **Ejecución**: Shell seguro, Python scripts, Node.js, despliegue de paquetes.
+- **Git Pro**: Gestión completa de repositorios, ramas y commits.
+- **Web & API**: Navegación con `browser` y peticiones `http_request`.
+- **Visión**: `get_visual_context` y `point_to_object`.
 
-### File Operations
-- `read_file` - Leer archivos
-- `write_file` - Crear/escribir archivos
-- `list_directory` - Listar directorios
-- `search_files` - Buscar archivos
-- `delete_file` - Eliminar archivos
-- `get_file_info` - Info de archivos
-
-### Command Execution
-- `execute_command` - Ejecutar comandos shell
-- `run_script` - Ejecutar scripts (Python, Bash, Node, etc.)
-- `install_package` - Instalar paquetes (pip, npm, etc.)
-
-### Git Operations
-- `git_status` - Estado del repositorio
-- `git_diff` - Ver cambios
-- `git_commit` - Hacer commits
-- `git_log` - Historial de commits
+---
 
 ## 🏗️ Arquitectura
 
-```
-Model (LLM) + Tools + Instructions = Agente Autónomo
-         ↓
-   Ciclo Plan & Act
-         ↓
-  1. Analizar tarea
-  2. Planificar acciones
-  3. Ejecutar tools
-  4. Verificar resultados
-  5. Responder al usuario
-```
-
-### Componentes
-
-- **Agent Core** (`backend/agent/core.py`) - Motor principal
-- **LLM Provider** (`backend/agent/llm_provider.py`) - Abstracción multi-LLM
-- **Context Manager** (`backend/agent/context.py`) - Memoria y conversaciones
-- **Tools** (`backend/tools/`) - Herramientas extensibles
-
-## 💡 Ejemplos de Uso
-
-### Gestión de Archivos
-
-```python
-"Crea un archivo config.json con configuración básica"
-"Lee el contenido de README.md"
-"Busca todos los archivos Python en este proyecto"
+```mermaid
+graph TD
+    User((Usuario)) --> UI[Frontend - Glassmorphism UI]
+    UI --> WS[WebSocket / API FastAPI]
+    WS --> Core[Agent Core - Plan & Act]
+    Core --> LLM{LLM Provider}
+    LLM --> OpenAI[OpenAI / Anthropic]
+    LLM --> Ollama[Ollama Local]
+    Core --> Tools[Tool Registry]
+    Tools --> Cloud[AWS/Azure/OCI/GCP]
+    Tools --> Obs[Nagios/Rundeck]
+    Tools --> Vision[Vision Manager - WebRTC]
+    Vision <--> Mobile((Móvil Usuario))
 ```
 
-### Desarrollo
+---
 
-```python
-"Crea un script Python que calcule fibonacci"
-"Haz commit de los cambios con mensaje 'feat: add feature'"
-"Ejecuta los tests con pytest"
-```
+## 💡 Ejemplos de lo que puede hacer por ti
 
-### Comandos Shell
+> "Revisa las instancias de **AWS** en 'us-east-1' que tengan la tag 'Producción' y dime si alguna tiene uso de CPU > 90%."
 
-```python
-"Ejecuta 'npm install' en el directorio frontend"
-"Instala el paquete requests con pip"
-"Lista los procesos de Python corriendo"
-```
+> "Mira a través de mi cámara (Visión) y dime qué cables están mal conectados en este rack."
 
-## 🔧 Configuración
+> "Conéctate a **Nagios**, busca las alertas críticas de la última hora y genera un reporte en un archivo markdown."
 
-### Niveles de Autonomía
+> "Lanza el job 'Backup-DB' en **Rundeck** y avísame cuando termine consultando los logs."
 
-```python
-# Autónomo total
-config = AgentConfig(autonomy_level="full")
-
-# Semi-autónomo (recomendado)
-config = AgentConfig(autonomy_level="semi")
-
-# Supervisado
-config = AgentConfig(autonomy_level="supervised")
-```
-
-### Cambiar LLM
-
-```python
-# DeepSeek
-llm = create_llm_provider("deepseek", model="deepseek-chat")
-
-# OpenAI
-llm = create_llm_provider("openai", model="gpt-4")
-
-# Anthropic
-llm = create_llm_provider("anthropic", model="claude-3-5-sonnet-20241022")
-
-# Ollama (local)
-llm = create_llm_provider("ollama", model="deepseek-coder:33b")
-```
+---
 
 ## 📁 Estructura del Proyecto
 
-```
-auto/
-├── backend/
-│   ├── agent/          # Core del agente
-│   │   ├── core.py     # Motor principal
-│   │   ├── llm_provider.py  # Multi-LLM
-│   │   ├── context.py  # Memoria
-│   │   └── prompts.py  # System prompts
-│   └── tools/          # Tools
-│       ├── file_tools.py
-│       ├── command_tools.py
-│       └── git_tools.py
-├── examples/           # Ejemplos de uso
-├── Docs/              # Documentación completa
-└── requirements.txt   # Dependencias
-```
+- `backend/`: API FastAPI y lógica del agente (`core.py`, `llm_provider.py`).
+- `frontend/`: Interfaz web moderna con soporte para WebRTC.
+- `Docs/`: Documentación detallada por módulos.
+- `scripts/`: Utilidades de control y mantenimiento.
 
-## 🧪 Testing
-
-```bash
-# Test de tools individuales
-python examples/test_tools.py
-
-# Tests unitarios (próximamente)
-pytest tests/
-```
-
-## 🚧 Roadmap
-
-- [x] Core del agente con ciclo Plan & Act
-- [x] Multi-LLM (OpenAI, Anthropic, DeepSeek, Ollama)
-- [x] Tools fundamentales (archivos, comandos, Git)
-- [x] Backend API (FastAPI + WebSocket)
-- [x] Frontend web (Live Terminal, Glassmorphism)
-- [x] Resiliencia de Tools y Fallback Parsing
-- [ ] Tools de Cloud avanzados (AWS native, Azure, GCP)
-- [ ] Aprendizaje dinámico de APIs
-- [ ] Sistema RAG para documentación
+---
 
 ## 📄 Licencia
 
-MIT License
+Este proyecto está bajo la licencia **MIT**. Siéntete libre de usarlo, modificarlo y contribuir.
 
-## 🤝 Contribuir
+---
 
-Ver [Guía de Contribución](Docs/development/contributing.md)
+## 🤝 Contribuciones
 
-## 💬 Soporte
+¿Quieres añadir soporte para más herramientas? ¡Los Pull Requests son bienvenidos!
 
-- Documentación: [Docs/](Docs/)
-- Issues: GitHub Issues
-- Ejemplos: [examples/](examples/)
+1. Fork el proyecto.
+2. Crea una rama (`git checkout -b feature/AmazingTool`).
+3. Commit tus cambios (`git commit -m 'Add AmazingTool'`).
+4. Push a la rama (`git push origin feature/AmazingTool`).
+5. Abre un Pull Request.
+
+---
+*Hecho por [LordZero](https://github.com/jorgeurtubiam-ship-it) - 2026*
